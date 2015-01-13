@@ -83,8 +83,10 @@ void render(char **board)
 				printf("%s", " ");
 			else
 				printf("%c", board[i][j]);
+
+			printf("%s", "|");
 		}
-		printf("\n");
+		printf("\n- - - - - - - - -\n");
 	}
 }
 
@@ -124,9 +126,8 @@ int validMove(char *move, int turn, char **board)
 
 	// Get the piece being moved.
 	char piece = board[starty][startx];
-	printf("%d %d %d\n", piece, turn, turn % 2);
 
-	// Check to see if the selected position and move to position are valid.
+	// Check to see if the start and end positions are valid.
 	if (startx < 1 | startx > 8)
 		return 0;
 	if (starty < 1 | starty > 8)
@@ -172,7 +173,7 @@ int validMove(char *move, int turn, char **board)
 				return 0;
 		}
 	}
-	if (piece == 'P')
+	else if (piece == 'P')
 	{
 		// Check to see if attacking.
 		if (board[endy][endx] >= 97 && board[endy][endx] <= 122)
@@ -197,8 +198,277 @@ int validMove(char *move, int turn, char **board)
 	}
 
 	// Check to see if move is valid for rook.
+	else if (piece == 'r' | piece == 'R')
+	{
+		// Rooks must move horizontally
+		if (endy - starty == 0)
+		{
+			// Check to make sure there are no pieces in between the start and end positions.
+			if (endx > startx)
+			{
+				for (int i = startx + 1; i < endx; i++)
+				{
+					if (board[starty][i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else
+			{
+				for (int i = startx - 1; i > endx; i--)
+				{
+					if (board[starty][i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+		}
+		// or vertically.
+		else if (endx - startx == 0)
+		{
+			// Check to make sure there are no pieces in between the start and end positions.
+			if (endy > starty)
+			{
+				for (int i = starty + 1; i < endy; i++)
+				{
+					if (board[i][startx] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else
+			{
+				for (int i = starty - 1; i > endy; i--)
+				{
+					if (board[i][startx] != 0)
+						return 0;
+				}
+				return 1;
+			}
+		}
+		else
+			return 0;
+	}
+
+	// Check to see if move is valid for a knight.
+	else if (piece == 'k' | piece == 'K')
+	{
+		// Only allow proper knight moves.
+		if (endy - starty == 1 && endx - startx == 2)
+			return 1;
+		else if (endy - starty == 1 && endx - startx == -2)
+			return 1;
+		else if (endy - starty == -1 && endx - startx == 2)
+			return 1;
+		else if (endy - starty == -1 && endx - startx == -2)
+			return 1;
+		else if (endy - starty == 2 && endx - startx == 1)
+			return 1;
+		else if (endy - starty == 2 && endx - startx == -1)
+			return 1;
+		else if (endy - starty == -2 && endx - startx == 1)
+			return 1;
+		else if (endy - starty == -2 && endx - startx == -1)
+			return 1;
+		else
+			return 0;
+	}
+
+	// Check to see if move is valid for a bishop.
+	else if (piece == 'b' | piece == 'B')
+	{
+		// Only allow diagonal moves.
+		if (starty - startx == endy - endx | starty - startx == -(endy - endx))
+		{
+			// Get the direction of the move.
+			int xdir = endx - startx;
+			int ydir = endy - starty;
+
+			// Make sure no pieces are in the way.
+			if (xdir > 0 && ydir > 0)
+			{
+				for (int i = 1; i < endx - startx; ++i)
+				{
+					if (board[starty+i][startx+i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else if (xdir > 0 && ydir < 0)
+			{
+				for (int i = 1; i < endx - startx; ++i)
+				{
+					if (board[starty-i][startx+i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else if (xdir < 0 && ydir > 0)
+			{
+				for (int i = 1; i < -(endx - startx); ++i)
+				{
+					if (board[starty+i][startx-i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else if (xdir < 0 && ydir < 0)
+			{
+				for (int i = 1; i < -(endx - startx); ++i)
+				{
+					if (board[starty-i][startx-i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else
+				return 0;
+		}
+		else
+			return 0;
+	}
+
+	// Check to see if a move is valid for a queen.
+	else if (piece == 'q' | piece == 'Q')
+	{
+		// Allow diagonal moves.
+		if (endx - startx == endy - starty | endx - startx == -(endy - starty))
+		{
+			// Get the direction of the move.
+			int xdir = endx - startx;
+			int ydir = endy - starty;
+
+			// Make sure no pieces are in the way.
+			if (xdir > 0 && ydir > 0)
+			{
+				for (int i = 1; i < endx - startx; ++i)
+				{
+					if (board[starty+i][startx+i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else if (xdir > 0 && ydir < 0)
+			{
+				for (int i = 1; i < endx - startx; ++i)
+				{
+					if (board[starty-i][startx+i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else if (xdir < 0 && ydir > 0)
+			{
+				for (int i = 1; i < -(endx - startx); ++i)
+				{
+					if (board[starty+i][startx-i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else if (xdir < 0 && ydir < 0)
+			{
+				for (int i = 1; i < -(endx - startx); ++i)
+				{
+					if (board[starty-i][startx-i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else
+				return 0;
+		}
+		// or horizontal moves.
+		else if (endy - starty == 0)
+		{
+			// Check to make sure there are no pieces in between the start and end positions.
+			if (endx > startx)
+			{
+				for (int i = startx + 1; i < endx; i++)
+				{
+					if (board[starty][i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else
+			{
+				for (int i = startx - 1; i > endx; i--)
+				{
+					if (board[starty][i] != 0)
+						return 0;
+				}
+				return 1;
+			}
+		}
+		// or vertically.
+		else if (endx - startx == 0)
+		{
+			// Check to make sure there are no pieces in between the start and end positions.
+			if (endy > starty)
+			{
+				for (int i = starty + 1; i < endy; i++)
+				{
+					if (board[i][startx] != 0)
+						return 0;
+				}
+				return 1;
+			}
+			else
+			{
+				for (int i = starty - 1; i > endy; i--)
+				{
+					if (board[i][startx] != 0)
+						return 0;
+				}
+				return 1;
+			}
+		}
+		else
+			return 0;
+	}
+
+	// Check to see if move is valid for a king.
+	else if (piece == 'x' | piece == 'X')
+	{
+		if (endx - startx > 1 | endx - startx < -1)
+			return 0;
+		else if (endy - starty > 1 | endy - starty < -1)
+			return 0;
+		else
+			return 1;
+	}
 
 	return 1;
+}
+
+/*
+	Function: isCheckmate
+	Checks to see if a valid move is checkmate
+	Takes parameters string of move and double pointer to the board.
+	Returns either a 1 or 0 depeding on if it is checkmate.
+*/
+
+int isCheckmate(char *move, int turn, char **board)
+{
+	// Get the integer values for end position of move.
+	int endx = move[2] - 96;
+	int endy = 9 - (move[3] - 48);
+	printf("%d %c\n", turn, board[endy][endx]);
+
+	// Check to see if the end position is the opponents king.
+	if (turn % 2 == 0)
+	{
+		if (board[endy][endx] == 'x')
+			return 1;
+		else
+			return 0;
+	}
+	else
+		if (board[endy][endx] == 'X')
+			return 1;
+		else
+			return 0;
 }
 
 /*
@@ -258,8 +528,19 @@ int main(int argc, char *argv[])
 		{
 			if (validMove(move, turn, board) == 1)
 			{
-				makeMove(move, board);
-				turn += 1;
+				if (isCheckmate(move, turn, board) == 1)
+				{
+					if (turn % 2 == 0)
+						printf("%s\n", "Capital wins.");
+					else
+						printf("%s\n", "Lowercase wins.");
+					done = 1;
+				}
+				else
+				{
+					makeMove(move, board);
+					turn += 1;
+				}
 			}
 		}
 	}
