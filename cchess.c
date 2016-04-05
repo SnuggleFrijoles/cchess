@@ -81,13 +81,13 @@ void render(char **board)
 			char c = board[i][j];
 
 			if (c == 0)
-				printf("%s", " ");
+				printf("   ");
 			else
-				printf("%c", board[i][j]);
+				printf(" %c ", board[i][j]);
 
 			printf("%s", "|");
 		}
-		printf("\n- - - - - - - - -\n");
+		printf("\n--- --- --- --- --- --- --- --- ---\n");
 	}
 }
 
@@ -111,6 +111,27 @@ void freeBoard(char **board)
 }
 
 /*
+	Function: delay
+	A simple function to delay time.
+	Takes an amount of milliseconds as a parameter.
+	Returns nothing.
+*/
+
+void delay(int milliseconds)
+{
+    long pause;
+    clock_t now,then;
+
+    // Determines how long the pause should be as an amount of processor ticks.
+    pause = milliseconds*(CLOCKS_PER_SEC/1000);
+    now = then = clock();
+
+    // Loops until the correct amout of processor ticks has been achieved.
+    while( (now-then) < pause )
+        now = clock();
+}
+
+/*
 	Function: validMove
 	Determines if a move is valid.
 	Takes parameter string of move.
@@ -124,6 +145,7 @@ int validMove(char *move, int turn, char **board)
 	int starty = 9 - (move[1] - 48);
 	int endx = move[2] - 96;
 	int endy = 9 - (move[3] - 48);
+
 
 	// Get the piece being moved.
 	char piece = board[starty][startx];
@@ -594,7 +616,6 @@ int main(int argc, char *argv[])
 					move[1] = (char)randMove[1];
 					move[2] = (char)randMove[2];
 					move[3] = (char)randMove[3];
-					printf("%s\n", move);
 				}
 
 				// Check for checkmate, otherwise make move.
@@ -641,6 +662,79 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
+	}
+	else if (strncmp(players, "0", 1) == 0)
+	{
+		//render(board);
+		int randMove[4];
+
+		int games = 0, cwins = 0, lwins = 0;
+
+		while (games < 10000)
+		{
+			board = createBoard();
+			done = 0;
+			// Play two computers against eachother.
+			while (done == 0)
+			{
+				// Setup some variables.
+				// Make a random move to start off. Haven't figured out why this is necessary yet
+				// Make some random integers for the move
+				randMove[0] = (rand() % 8) + 97;
+				randMove[1] = (rand() % 8) + 49;
+				randMove[2] = (rand() % 8) + 97;
+				randMove[3] = (rand() % 8) + 49;
+
+				// Combine them to make a move.
+				move[0] = (char)randMove[0];
+				move[1] = (char)randMove[1];
+				move[2] = (char)randMove[2];
+				move[3] = (char)randMove[3];
+
+				// Generate random moves until a valid one is found.
+				while (validMove(move, turn, board) != 1)
+				{
+					// Make some random integers for the move
+					randMove[0] = (rand() % 8) + 97;
+					randMove[1] = (rand() % 8) + 49;
+					randMove[2] = (rand() % 8) + 97;
+					randMove[3] = (rand() % 8) + 49;
+
+					// Combine them to make a move.
+					move[0] = (char)randMove[0];
+					move[1] = (char)randMove[1];
+					move[2] = (char)randMove[2];
+					move[3] = (char)randMove[3];
+				}
+
+				// Check for checkmate, otherwise make move.
+				if (isCheckmate(move, turn, board) == 1)
+				{
+					//render(board);
+
+					if (turn % 2 == 0)
+						//printf("%s\n", "Capital wins.");
+						cwins++;
+					else
+						//printf("%s\n", "Lowercase wins.");
+						lwins++;
+					
+					done = 1;
+				}
+				else
+				{
+					makeMove(move, board);
+					//render(board);
+					turn += 1;
+				}
+
+				//delay(100);
+			}
+			games++;
+		}
+
+		printf("Capital wins: %d\n", cwins);
+		printf("Lowercase wins: %d\n", lwins);
 	}
 
 	freeBoard(board);
