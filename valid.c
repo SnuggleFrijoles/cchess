@@ -1,334 +1,404 @@
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "cchess.h"
+#include "board.h"
+#include "piece.h"
 
 /*
-	Function: validMove
-	Determines if a move is valid.
-	Takes parameter string of move.
-	Returns either a 1 or 0 depending of if the move is valid.
+Function: validMove
+Determines if a move is valid.
+Takes parameter string of move.
+Returns either a 1 or 0 depending of if the move is valid.
 */
 
-int validMove(char *move, int turn, char **board)
+int validMove(char move[4], int turn, Board *board)
 {
 	// Get the integer values for the move.
-	int startx = move[0] - 96;
-	int starty = 9 - (move[1] - 48);
-	int endx = move[2] - 96;
-	int endy = 9 - (move[3] - 48);
-
+	int startFile = move[0] - 97;
+	int startRank = 8 - (move[1] - 48);
+	int endFile = move[2] - 97;
+	int endRank = 8 - (move[3] - 48);
 
 	// Get the piece being moved.
-	char piece = board[starty][startx];
+	Piece *piece = board->board[startRank][startFile];
+	Piece *destination = board->board[endRank][endFile];
+
+	// Check if piece real
+	if (piece == NULL)
+		return 0;
 
 	// Check to see if the start and end positions are valid.
-	if (startx < 1 | startx > 8)
+	if (startFile < 0 | startFile > 7)
+	{
+		/*printf("Start file must be between a and h: %d\n", startFile + 1);*/
 		return 0;
-	if (starty < 1 | starty > 8)
+	}
+	if (startRank < 0 | startRank > 7)
+	{
+		/*printf("Start rank must be between 1 and 8: %d\n", startRank + 1);*/
 		return 0;
-	if (endx < 1 | endx > 8)
+	}
+	if (endFile < 0 | endFile > 7)
+	{
+		/*printf("End file must be between a and h: %d\n", endFile + 1);*/
 		return 0;
-	if (endy < 1 | endy > 8)
+	}
+	if (endRank < 0 | endRank > 7)
+	{
+		/*printf("End rank must be between 1 and 8: %d\n", endRank + 1);*/
 		return 0;
+	}
 
 	// Check to see if the wrongly owned piece is being moved.
-	if (turn % 2 == 0 && (piece < 65 | piece > 90))
+	if (piece->color != turn)
+	{
+		/*printf("Can't move opponents pieces!\n");*/
 		return 0;
-	if (turn % 2 == 1 && (piece < 97 | piece > 122))
-		return 0;
+	}
 
 	// Don't allow friendly fire.
-	if (board[starty][startx] >= 65 && board[starty][startx] <= 90 && board[endy][endx] >= 65 && board[endy][endx] <= 90)
+	if (destination != NULL && destination->color == turn)
+	{
+		/*printf("You shouldn't take your own pieces\n");*/
 		return 0;
-	if (board[starty][startx] >= 97 && board[starty][startx] <= 122 && board[endy][endx] >= 97 && board[endy][endx] <= 122)
+	}
+
+	// Call appropriate function
+	if (piece->type == PAWN)
+		return validPawn(move, turn, board);
+	else if (piece->type == ROOK)
+		return validRook(move, turn, board);
+	else if (piece->type == KNIGHT)
+		return validKnight(move, turn, board);
+	else if (piece->type == BISHOP) 
+		return validBishop(move, turn, board);
+	else if (piece->type == QUEEN)
+		return validQueen(move, turn, board);
+	else if (piece->type == KING)
+		return validKing(move, turn, board);
+
+	return 0;
+}
+
+int validPawn(char move[4], int turn, Board *board)
+{
+	// Get the integer values for the move.
+	int startFile = move[0] - 97;
+	int startRank = 8 - (move[1] - 48);
+	int endFile = move[2] - 97;
+	int endRank = 8 - (move[3] - 48);
+
+	Piece *destination = board->board[endRank][endFile];
+
+	// Check to see if moving or attacking
+	if (destination == NULL) 
+	{
+		// Must not change files
+		if (endFile - startFile == 0)
+		{
+			switch (turn)
+			{
+				case WHITE:
+					// Allow two space move from starting position if nothing in the way.
+					if (endRank - startRank == -2 && startRank == 6 && board->board[5][startFile] == NULL)
+						return 1;
+					// Allow standard one space forward move.
+					else
+						return (endRank - startRank == -1);
+				case BLACK:
+					// Allow two space move from starting position if nothing in the way.
+					if (endRank - startRank == 2 && startRank == 1 && board->board[2][startFile] == NULL)
+						return 1;
+					// Allow standard one space forward move.
+					else 
+						return (endRank - startRank == 1);
+				default:
+					return 0;
+			}
+		}
+		else
+			return 0;
+	}
+	else
+	{
+		// Only allow diagonal attacks
+		if (abs(endFile - startFile) == 1)
+		{
+			if (turn == WHITE)
+				return (endRank - startRank == -1);
+			else
+				return (endRank - startRank == 1);
+		}
+		else
+			return 0;
+	}
+}
+
+int validRook(char move[4], int turn, Board *board)
+{
+	// Get the integer values for the move.
+	int startFile = move[0] - 97;
+	int startRank = 8 - (move[1] - 48);
+	int endFile = move[2] - 97;
+	int endRank = 8 - (move[3] - 48);
+	
+	// Rooks must move horizontally
+	if (endRank == startRank)
+	{
+		// Check to make sure there are no pieces in between the start and end positions.
+		if (endFile > startFile)
+		{
+			for (int i = startFile + 1; i < endFile; i++)
+			{
+				if (board->board[startRank][i] != NULL)
+					return 0;
+			}
+			return 1;
+		}
+		else
+		{
+			for (int i = startFile - 1; i > endFile; i--)
+			{
+				if (board->board[startRank][i] != NULL)
+					return 0;
+			}
+			return 1;
+		}
+	}
+	// or vertically.
+	else if (endFile == startFile)
+	{
+		// Check to make sure there are no pieces in between the start and end positions.
+		if (endRank > startRank)
+		{
+			for (int i = startRank + 1; i < endRank; i++)
+			{
+				if (board->board[i][startFile] != NULL)
+					return 0;
+			}
+			return 1;
+		}
+		else
+		{
+			for (int i = startRank - 1; i > endRank; i--)
+			{
+				if (board->board[i][startFile] != NULL)
+					return 0;
+			}
+			return 1;
+		}
+	}
+	else
 		return 0;
 
-	// Check if move is valid for a pawn.
-	if (piece == 'p')
-	{
-		// Check to see if attacking.
-		if (board[endy][endx] >= 65 && board[endy][endx] <= 90)
-		{
-			// Only allow diagonal attacks.
-			if (endy - starty == 1 && (endx - startx == 1 | endx - startx == -1))
-				return 1;
-			else
-				return 0;
-		}
-		else
-		{
-			// Allow two space move from starting position if nothing in the way.
-			if (endy - starty == 2 && starty == 2 && board[3][startx] == 0 && endx - startx == 0)
-				return 1;
-			// Allow standard one space forward move.
-			else if (endy - starty == 1 && endx - startx == 0)
-				return 1;
-			else
-				return 0;
-		}
-	}
-	else if (piece == 'P')
-	{
-		// Check to see if attacking.
-		if (board[endy][endx] >= 97 && board[endy][endx] <= 122)
-		{
-			// Only allow diagonal attacks.
-			if (endy - starty == -1 && (endx - startx == 1 | endx - startx == -1))
-				return 1;
-			else
-				return 0;
-		}
-		else
-		{
-			// Allow two space move from starting position if nothing in the way.
-			if (endy - starty == -2 && starty == 7 && board[6][startx] == 0 && endx - startx == 0)
-				return 1;
-			// Allow standard one space forward move.
-			else if (endy - starty == -1 && endx - startx == 0)
-				return 1;
-			else
-				return 0;
-		}
-	}
+}
 
-	// Check to see if move is valid for rook.
-	else if (piece == 'r' | piece == 'R')
+int validKnight(char move[4], int turn, Board *board)
+{
+	// Get the integer values for the move.
+	int startFile = move[0] - 97;
+	int startRank = 8 - (move[1] - 48);
+	int endFile = move[2] - 97;
+	int endRank = 8 - (move[3] - 48);
+
+	// Only allow proper knight moves.
+	if (endRank - startRank == 1 && endFile - startFile == 2)
+		return 1;
+	else if (endRank - startRank == 1 && endFile - startFile == -2)
+		return 1;
+	else if (endRank - startRank == -1 && endFile - startFile == 2)
+		return 1;
+	else if (endRank - startRank == -1 && endFile - startFile == -2)
+		return 1;
+	else if (endRank - startRank == 2 && endFile - startFile == 1)
+		return 1;
+	else if (endRank - startRank == 2 && endFile - startFile == -1)
+		return 1;
+	else if (endRank - startRank == -2 && endFile - startFile == 1)
+		return 1;
+	else if (endRank - startRank == -2 && endFile - startFile == -1)
+		return 1;
+	else
+		return 0;
+}
+
+int validBishop(char move[4], int turn, Board *board)
+{
+	// Get the integer values for the move.
+	int startFile = move[0] - 97;
+	int startRank = 8 - (move[1] - 48);
+	int endFile = move[2] - 97;
+	int endRank = 8 - (move[3] - 48);
+
+	// Only allow diagonal moves.
+	if (endFile - startFile == endRank - startRank | endFile - startFile == -(endRank - startRank))
 	{
-		// Rooks must move horizontally
-		if (endy - starty == 0)
+		// Get the direction of the move.
+		int xdir = endFile - startFile;
+		int ydir = endRank - startRank;
+
+		// Make sure no pieces are in the way.
+		if (xdir > 0 && ydir > 0)
 		{
-			// Check to make sure there are no pieces in between the start and end positions.
-			if (endx > startx)
+			for (int i = 1; i < endFile - startFile; ++i)
 			{
-				for (int i = startx + 1; i < endx; i++)
-				{
-					if (board[starty][i] != 0)
-						return 0;
-				}
-				return 1;
+				if (board->board[startRank+i][startFile+i] != 0)
+					return 0;
 			}
-			else
-			{
-				for (int i = startx - 1; i > endx; i--)
-				{
-					if (board[starty][i] != 0)
-						return 0;
-				}
-				return 1;
-			}
+			return 1;
 		}
-		// or vertically.
-		else if (endx - startx == 0)
+		else if (xdir > 0 && ydir < 0)
 		{
-			// Check to make sure there are no pieces in between the start and end positions.
-			if (endy > starty)
+			for (int i = 1; i < endFile - startFile; ++i)
 			{
-				for (int i = starty + 1; i < endy; i++)
-				{
-					if (board[i][startx] != 0)
-						return 0;
-				}
-				return 1;
+				if (board->board[startRank-i][startFile+i] != 0)
+					return 0;
 			}
-			else
+			return 1;
+		}
+		else if (xdir < 0 && ydir > 0)
+		{
+			for (int i = 1; i < -(endFile - startFile); ++i)
 			{
-				for (int i = starty - 1; i > endy; i--)
-				{
-					if (board[i][startx] != 0)
-						return 0;
-				}
-				return 1;
+				if (board->board[startRank+i][startFile-i] != 0)
+					return 0;
 			}
+			return 1;
+		}
+		else if (xdir < 0 && ydir < 0)
+		{
+			for (int i = 1; i < -(endFile - startFile); ++i)
+			{
+				if (board->board[startRank-i][startFile-i] != 0)
+					return 0;
+			}
+			return 1;
 		}
 		else
 			return 0;
 	}
+	else
+		return 0;
+}
 
-	// Check to see if move is valid for a knight.
-	else if (piece == 'k' | piece == 'K')
-	{
-		// Only allow proper knight moves.
-		if (endy - starty == 1 && endx - startx == 2)
-			return 1;
-		else if (endy - starty == 1 && endx - startx == -2)
-			return 1;
-		else if (endy - starty == -1 && endx - startx == 2)
-			return 1;
-		else if (endy - starty == -1 && endx - startx == -2)
-			return 1;
-		else if (endy - starty == 2 && endx - startx == 1)
-			return 1;
-		else if (endy - starty == 2 && endx - startx == -1)
-			return 1;
-		else if (endy - starty == -2 && endx - startx == 1)
-			return 1;
-		else if (endy - starty == -2 && endx - startx == -1)
-			return 1;
-		else
-			return 0;
-	}
+int validQueen(char move[4], int turn, Board *board)
+{
+	// Get the integer values for the move.
+	int startFile = move[0] - 97;
+	int startRank = 8 - (move[1] - 48);
+	int endFile = move[2] - 97;
+	int endRank = 8 - (move[3] - 48);
 
-	// Check to see if move is valid for a bishop.
-	else if (piece == 'b' | piece == 'B')
+	// Allow diagonal moves.
+	if (endFile - startFile == endRank - startRank | endFile - startFile == -(endRank - startRank))
 	{
-		// Only allow diagonal moves.
-		if (endx - startx == endy - starty | endx - startx == -(endy - starty))
+		// Get the direction of the move.
+		int xdir = endFile - startFile;
+		int ydir = endRank - startRank;
+
+		// Make sure no pieces are in the way.
+		if (xdir > 0 && ydir > 0)
 		{
-			// Get the direction of the move.
-			int xdir = endx - startx;
-			int ydir = endy - starty;
-
-			// Make sure no pieces are in the way.
-			if (xdir > 0 && ydir > 0)
+			for (int i = 1; i < endFile - startFile; ++i)
 			{
-				for (int i = 1; i < endx - startx; ++i)
-				{
-					if (board[starty+i][startx+i] != 0)
-						return 0;
-				}
-				return 1;
+				if (board->board[startRank+i][startFile+i] != 0)
+					return 0;
 			}
-			else if (xdir > 0 && ydir < 0)
+			return 1;
+		}
+		else if (xdir > 0 && ydir < 0)
+		{
+			for (int i = 1; i < endFile - startFile; ++i)
 			{
-				for (int i = 1; i < endx - startx; ++i)
-				{
-					if (board[starty-i][startx+i] != 0)
-						return 0;
-				}
-				return 1;
+				if (board->board[startRank-i][startFile+i] != 0)
+					return 0;
 			}
-			else if (xdir < 0 && ydir > 0)
+			return 1;
+		}
+		else if (xdir < 0 && ydir > 0)
+		{
+			for (int i = 1; i < -(endFile - startFile); ++i)
 			{
-				for (int i = 1; i < -(endx - startx); ++i)
-				{
-					if (board[starty+i][startx-i] != 0)
-						return 0;
-				}
-				return 1;
+				if (board->board[startRank+i][startFile-i] != 0)
+					return 0;
 			}
-			else if (xdir < 0 && ydir < 0)
+			return 1;
+		}
+		else if (xdir < 0 && ydir < 0)
+		{
+			for (int i = 1; i < -(endFile - startFile); ++i)
 			{
-				for (int i = 1; i < -(endx - startx); ++i)
-				{
-					if (board[starty-i][startx-i] != 0)
-						return 0;
-				}
-				return 1;
+				if (board->board[startRank-i][startFile-i] != 0)
+					return 0;
 			}
-			else
-				return 0;
+			return 1;
 		}
 		else
 			return 0;
 	}
-
-	// Check to see if a move is valid for a queen.
-	else if (piece == 'q' | piece == 'Q')
+	// or horizontal moves.
+	else if (endRank - startRank == 0)
 	{
-		// Allow diagonal moves.
-		if (endx - startx == endy - starty | endx - startx == -(endy - starty))
+		// Check to make sure there are no pieces in between the start and end positions.
+		if (endFile > startFile)
 		{
-			// Get the direction of the move.
-			int xdir = endx - startx;
-			int ydir = endy - starty;
-
-			// Make sure no pieces are in the way.
-			if (xdir > 0 && ydir > 0)
+			for (int i = startFile + 1; i < endFile; i++)
 			{
-				for (int i = 1; i < endx - startx; ++i)
-				{
-					if (board[starty+i][startx+i] != 0)
-						return 0;
-				}
-				return 1;
+				if (board->board[startRank][i] != 0)
+					return 0;
 			}
-			else if (xdir > 0 && ydir < 0)
-			{
-				for (int i = 1; i < endx - startx; ++i)
-				{
-					if (board[starty-i][startx+i] != 0)
-						return 0;
-				}
-				return 1;
-			}
-			else if (xdir < 0 && ydir > 0)
-			{
-				for (int i = 1; i < -(endx - startx); ++i)
-				{
-					if (board[starty+i][startx-i] != 0)
-						return 0;
-				}
-				return 1;
-			}
-			else if (xdir < 0 && ydir < 0)
-			{
-				for (int i = 1; i < -(endx - startx); ++i)
-				{
-					if (board[starty-i][startx-i] != 0)
-						return 0;
-				}
-				return 1;
-			}
-			else
-				return 0;
-		}
-		// or horizontal moves.
-		else if (endy - starty == 0)
-		{
-			// Check to make sure there are no pieces in between the start and end positions.
-			if (endx > startx)
-			{
-				for (int i = startx + 1; i < endx; i++)
-				{
-					if (board[starty][i] != 0)
-						return 0;
-				}
-				return 1;
-			}
-			else
-			{
-				for (int i = startx - 1; i > endx; i--)
-				{
-					if (board[starty][i] != 0)
-						return 0;
-				}
-				return 1;
-			}
-		}
-		// or vertically.
-		else if (endx - startx == 0)
-		{
-			// Check to make sure there are no pieces in between the start and end positions.
-			if (endy > starty)
-			{
-				for (int i = starty + 1; i < endy; i++)
-				{
-					if (board[i][startx] != 0)
-						return 0;
-				}
-				return 1;
-			}
-			else
-			{
-				for (int i = starty - 1; i > endy; i--)
-				{
-					if (board[i][startx] != 0)
-						return 0;
-				}
-				return 1;
-			}
-		}
-		else
-			return 0;
-	}
-
-	// Check to see if move is valid for a king.
-	else if (piece == 'x' | piece == 'X')
-	{
-		if (endx - startx > 1 | endx - startx < -1)
-			return 0;
-		else if (endy - starty > 1 | endy - starty < -1)
-			return 0;
-		else
 			return 1;
+		}
+		else
+		{
+			for (int i = startFile - 1; i > endFile; i--)
+			{
+				if (board->board[startRank][i] != 0)
+					return 0;
+			}
+			return 1;
+		}
 	}
+	// or vertically.
+	else if (endFile - startFile == 0)
+	{
+		// Check to make sure there are no pieces in between the start and end positions.
+		if (endRank > startRank)
+		{
+			for (int i = startRank + 1; i < endRank; i++)
+			{
+				if (board->board[i][startFile] != 0)
+					return 0;
+			}
+			return 1;
+		}
+		else
+		{
+			for (int i = startRank - 1; i > endRank; i--)
+			{
+				if (board->board[i][startFile] != 0)
+					return 0;
+			}
+			return 1;
+		}
+	}
+	else
+		return 0;
+}
 
-	return 1;
+int validKing(char move[4], int turn, Board *board)
+{
+	// Get the integer values for the move.
+	int startFile = move[0] - 97;
+	int startRank = 8 - (move[1] - 48);
+	int endFile = move[2] - 97;
+	int endRank = 8 - (move[3] - 48);
+
+	if (endFile - startFile > 1 | endFile - startFile < -1)
+		return 0;
+	else if (endRank - startRank > 1 | endRank - startRank < -1)
+		return 0;
+	else
+		return 1;
 }

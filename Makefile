@@ -7,7 +7,7 @@ CC = gcc
 CFLAGS = -g -Wall -Werror -O2
 
 # Object files to build to prevent unnecessary compilation
-OBJECTS = board.o piece.o cchess.o 
+OBJECTS = board.o piece.o valid.o cchess.o 
 
 # Linker flags
 LDFLAGS = 

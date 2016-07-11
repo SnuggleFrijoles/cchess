@@ -2,6 +2,7 @@
 #include <stdlib.h>		// rand, srand
 #include <string.h>		// strncmp
 #include <time.h>		// time
+#include "cchess.h"
 #include "board.h"
 #include "piece.h"
 
@@ -30,29 +31,21 @@ void delay(int milliseconds)
 /*
 	Function: isCheckmate
 	Checks to see if a valid move is checkmate
-	Takes parameters string of move and double pointer to the board.
+	Takes parameters string of move and a pointer to the board.
 	Returns either a 1 or 0 depeding on if it is checkmate.
 */
 
-int isCheckmate(char *move, int turn, char **board)
+int isCheckmate(char move[4], int turn, Board *board)
 {
 	// Get the integer values for end position of move.
-	int endx = move[2] - 96;
-	int endy = 9 - (move[3] - 48);
+	int endFile = move[2] - 97;
+	int endRank = 8 - (move[3] - 48);
 
-	// Check to see if the end position is the opponents king.
-	if (turn % 2 == 0)
-	{
-		if (board[endy][endx] == 'x')
-			return 1;
-		else
-			return 0;
-	}
+	// Check to see if the end position is a king.
+	if (board->board[endRank][endFile] != NULL)
+		return (board->board[endRank][endFile]->type == KING);
 	else
-		if (board[endy][endx] == 'X')
-			return 1;
-		else
-			return 0;
+		return 0;
 }
 
 /*
@@ -86,7 +79,7 @@ void makeMove(char *move, Board *board)
 int done = 0;
 int turn = 0;
 char move[4];
-char players[1];
+int players;
 
 int main(int argc, char *argv[])
 {
@@ -96,30 +89,23 @@ int main(int argc, char *argv[])
 	// Create and initialize the board.
 	Board *board = createBoard();
 
-	renderBoard(board);
-
-	makeMove("e2e4", board);
-
-	renderBoard(board);
-
-	/*
 	// Determine if 1-player or 2-player game.
 	printf("%s", "How many players? (1-2): ");
-	scanf("%s", players);
+	scanf("%d", &players);
 
 	// Determine if single player or two player.
-	if (strncmp(players, "2", 1) == 0)
+	if (players == 2)
 	{
 		// Run two player game loop until done.
 		while (done == 0)
 		{
-			render(board);
+			renderBoard(board);
 
 			// Announce whos move it is.
-			if (turn % 2 == 0)
-				printf("%s", "Capital move: ");
+			if (turn == WHITE)
+				printf("%s", "White (uppercase) move: ");
 			else
-				printf("%s", "Lowercase move: ");
+				printf("%s", "Black (lowercase) move: ");
 
 			// Get the move.
 			scanf("%s", move);
@@ -128,11 +114,11 @@ int main(int argc, char *argv[])
 				done = 1;
 			else
 			{
-				if (validMove(move, turn, board) == 1)
+				if (validMove(move, turn, board))
 				{
-					if (isCheckmate(move, turn, board) == 1)
+					if (isCheckmate(move, turn, board))
 					{
-						render(board);
+						renderBoard(board);
 						if (turn % 2 == 0)
 							printf("%s\n", "Capital wins.");
 						else
@@ -142,21 +128,21 @@ int main(int argc, char *argv[])
 					else
 					{
 						makeMove(move, board);
-						turn += 1;
+						turn = (turn + 1) % 2;
 					}
 				}
 			}
 		}
 	}
-	else if (strncmp(players, "1", 1) == 0)
+	else if (players == 1)
 	{
 		// Run player vs computer game until done.
 		while (done == 0)
 		{
-			render(board);
+			renderBoard(board);
 
 			// Determine whos turn it is.
-			if (turn % 2 == 0)
+			if (turn == PLAYER)
 			{
 				// If it is the players turn, get the desired move.
 				printf("%s", "Your move: ");
@@ -190,7 +176,7 @@ int main(int argc, char *argv[])
 				// Check for checkmate, otherwise make move.
 				if (isCheckmate(move, turn, board) == 1)
 				{
-					render(board);
+					renderBoard(board);
 
 					if (turn % 2 == 0)
 						printf("%s\n", "Player wins.");
@@ -202,7 +188,7 @@ int main(int argc, char *argv[])
 				else
 				{
 					makeMove(move, board);
-					turn += 1;
+					turn = (turn + 1) % 2;
 				}
 			}
 
@@ -214,7 +200,7 @@ int main(int argc, char *argv[])
 				{
 					if (isCheckmate(move, turn, board) == 1)
 					{
-						render(board);
+						renderBoard(board);
 
 						if (turn % 2 == 0)
 							printf("%s\n", "Player wins.");
@@ -226,13 +212,13 @@ int main(int argc, char *argv[])
 					else
 					{
 						makeMove(move, board);
-						turn += 1;
+						turn = (turn + 1) % 2;
 					}
 				}
 			}
 		}
 	}
-	else if (strncmp(players, "0", 1) == 0)
+	else if (players == 0)
 	{
 		//render(board);
 		int randMove[4];
@@ -261,7 +247,7 @@ int main(int argc, char *argv[])
 				move[3] = (char)randMove[3];
 
 				// Generate random moves until a valid one is found.
-				while (validMove(move, turn, board) != 1)
+				while (/*validMove(move, turn, board) != 1*/0)
 				{
 					// Make some random integers for the move
 					randMove[0] = (rand() % 8) + 97;
@@ -277,7 +263,7 @@ int main(int argc, char *argv[])
 				}
 
 				// Check for checkmate, otherwise make move.
-				if (isCheckmate(move, turn, board) == 1)
+				if (isCheckmate(move, turn, board))
 				{
 					//render(board);
 
@@ -307,6 +293,6 @@ int main(int argc, char *argv[])
 	}
 
 	freeBoard(board);
-	*/
+	
 	return 0;
 }
