@@ -3,7 +3,7 @@ TARGET = cchess
 CC = gcc
 # Use gcc compiler
 
-CFLAGS = -Wall -Werror
+CFLAGS = -Wall -Werror -Isrc/include
 # -Wall : Show all errors
 # -Werror : Make warnings errors
 
@@ -18,11 +18,12 @@ LINKER   = gcc -o
 LFLAGS   = -Wall -I. -lm 
 
 SRCDIR   = src
+INCLUDEDIR = src/include
 OBJDIR   = obj
 BINDIR   = bin
 
 SOURCES  := $(wildcard $(SRCDIR)/*.c)
-INCLUDES := $(wildcard $(SRCDIR)/*.h)
+INCLUDES := $(wildcard $(INCLUDEDIR)/*.h)
 OBJECTS  := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 rm       = rm -f
 

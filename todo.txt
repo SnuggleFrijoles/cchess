@@ -1,8 +1,0 @@
-* Create move selection algorithm
-	- Recursive based on GameStates
-	- Maximum recursive depth (probably very small)
-	- Find all available moves
-	- For each move:
-		- Create new game state and play move
-		- Find best move increasing depth
-	- At max depth, return eval:

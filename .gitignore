@@ -1,5 +1,5 @@
 # executable
-cchess
+bin/*
 
 # Object files
 *.o
