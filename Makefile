@@ -36,7 +36,7 @@ release: CFLAGS += $(RELEASEFLAGS)
 release: $(BINDIR)/$(TARGET)
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
-	mkdir bin
+	mkdir -p bin
 	$(LINKER) $@ $(LFLAGS) $(OBJECTS)
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
