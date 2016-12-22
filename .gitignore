@@ -1,0 +1,10 @@
+# executable
+cchess
+
+# Object files
+*.o
+
+# Vim files
+*.swp
+
+
