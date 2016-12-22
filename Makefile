@@ -1,26 +1,49 @@
-# Use gcc compiler
+TARGET = cchess
+
 CC = gcc
+# Use gcc compiler
 
+CFLAGS = -Wall -Werror
+# -Wall : Show all errors
+# -Werror : Make warnings errors
+
+DEBUGFLAGS = -g -DDEBUG
 # -g : Include debugging information
-# -Wall, -Werror : Show all errors and warnings
-# -O2 : Do 2nd level optimization
-CFLAGS = -g -Wall -Werror -O2
+# -DDEBUG : #define DEBUG
 
-# Object files to build to prevent unnecessary compilation
-OBJECTS = board.o piece.o valid.o cchess.o 
+RELEASEFLAGS = -O3
+# -O3 : Highest level optimization
 
-# Linker flags
-LDFLAGS = 
+LINKER   = gcc -o 
+LFLAGS   = -Wall -I. -lm 
 
-# Default target that gets called by make
-default : $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $(LDFLAGS) -o cchess 
+SRCDIR   = src
+OBJDIR   = obj
+BINDIR   = bin
 
-# Make object files
-%.o : %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+SOURCES  := $(wildcard $(SRCDIR)/*.c)
+INCLUDES := $(wildcard $(SRCDIR)/*.h)
+OBJECTS  := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+rm       = rm -f
 
-# Clean object files and binaries
+all: release
+
+debug: CFLAGS += $(DEBUGFLAGS) 
+debug: $(BINDIR)/$(TARGET)
+
+release: CFLAGS += $(RELEASEFLAGS) 
+release: $(BINDIR)/$(TARGET)
+
+$(BINDIR)/$(TARGET): $(OBJECTS)
+	$(LINKER) $@ $(LFLAGS) $(OBJECTS)
+
+$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONEY: clean
 clean:
-	rm *.o
-	rm cchess
+	$(rm) $(OBJECTS)
+
+.PHONEY: remove
+remove: clean
+	$(rm) $(BINDIR)/$(TARGET)

@@ -7,7 +7,7 @@
 Board * createBoard()
 {
 	// Allocate a board
-	Board *new = calloc(64, sizeof(Board));
+	Board *new = calloc(1, sizeof(Board));
 
 	// Place starting pieces
 	new->board[0][0] = createPiece(ROOK, BLACK);
@@ -51,6 +51,22 @@ void freeBoard(Board *board)
 	free(board);
 }
 
+// Create a replica of a board
+Board * copyBoard(Board *board)
+{
+	Board *copy = calloc(1, sizeof(Board));
+
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			copy->board[i][j] = copyPiece(board->board[i][j]);
+		}
+	}
+
+	return copy;
+}
+
 /*
 	Function: render
 	Prints the board in a easy to understand manner.
@@ -61,7 +77,7 @@ void freeBoard(Board *board)
 void renderBoard(Board *board)
 {
 	// Clears the screen.
-	system("clear");
+	/*system("clear");*/
 
 	// Draw each of the pieces
 	Piece * p;
@@ -90,4 +106,32 @@ void renderBoard(Board *board)
 
 		printf("\n    --- --- --- --- --- --- --- ---\n");
 	}
+}
+
+Move * createMove(
+		unsigned char startRank,
+		unsigned char startFile,
+		unsigned char endRank,
+		unsigned char endFile
+	)
+{
+	Move *new = malloc(sizeof(Move));
+
+	new->startRank = startRank;
+	new->startFile = startFile;
+	new->endRank = endRank;
+	new->endFile = endFile;
+	
+	return new;
+}
+
+Move * copyMove(Move *orig)
+{
+	Move *copy = createMove(orig->startRank, orig->startFile, orig->endRank, orig->endFile);
+	return copy;
+}
+
+void printMove(Move *move)
+{
+	printf("%d %d %d %d\n", move->startRank, move->startFile, move->endRank, move->endFile);
 }

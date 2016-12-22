@@ -4,6 +4,7 @@
 #include "cchess.h"
 #include "board.h"
 #include "piece.h"
+#include "valid.h"
 
 /*
 Function: validMove
@@ -401,4 +402,36 @@ int validKing(char move[4], int turn, Board *board)
 		return 0;
 	else
 		return 1;
+}
+
+void moveToChar(Move *move, char moveResult[4])
+{
+	if (move->startRank < 0 || move->startRank > 7)
+	{
+		printf("moveToChar: Error: startRank out of range %d\n", move->startRank);
+		exit(EXIT_FAILURE);
+	}
+	
+	if (move->endRank < 0 || move->endRank > 7)
+	{
+		printf("moveToChar: Error: endRank out of range %d\n", move->endRank);
+		exit(EXIT_FAILURE);
+	}
+	
+	if (move->startFile < 0 || move->startFile > 7)
+	{
+		printf("moveToChar: Error: startFile out of range %d\n", move->startFile);
+		exit(EXIT_FAILURE);
+	}
+	
+	if (move->endFile < 0 || move->endFile > 7)
+	{
+		printf("moveToChar: Error: endFile out of range %d\n", move->endFile);
+		exit(EXIT_FAILURE);
+	}
+
+	moveResult[0] = 'a' + move->startRank;
+	moveResult[1] = '0' + move->startFile;
+	moveResult[2] = 'a' + move->endRank;
+	moveResult[3] = '0' + move->endFile;
 }
