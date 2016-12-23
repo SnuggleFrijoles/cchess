@@ -28,6 +28,7 @@ OBJECTS  := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 rm       = rm -f
 
 all: release
+	echo Compiling $(CLION_EXE_DIR)/$@ ...
 
 debug: CFLAGS += $(DEBUGFLAGS) 
 debug: $(BINDIR)/$(TARGET)
@@ -38,8 +39,10 @@ release: $(BINDIR)/$(TARGET)
 $(BINDIR)/$(TARGET): $(OBJECTS)
 	mkdir -p bin
 	$(LINKER) $@ $(LFLAGS) $(OBJECTS)
+	$(LINKER) $(CLION_EXE_DIR)/cchess $(LFLAGS) $(OBJECTS)
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
+	mkdir -p obj
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONEY: clean
