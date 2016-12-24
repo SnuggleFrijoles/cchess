@@ -39,7 +39,7 @@ release: $(BINDIR)/$(TARGET)
 $(BINDIR)/$(TARGET): $(OBJECTS)
 	mkdir -p bin
 	$(LINKER) $@ $(LFLAGS) $(OBJECTS)
-	$(LINKER) $(CLION_EXE_DIR)/cchess $(LFLAGS) $(OBJECTS)
+	#$(LINKER) $(CLION_EXE_DIR)/cchess $(LFLAGS) $(OBJECTS)
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	mkdir -p obj

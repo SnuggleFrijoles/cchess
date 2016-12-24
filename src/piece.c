@@ -20,6 +20,9 @@ void freePiece(Piece * piece)
 // Create a repilca of a piece
 Piece *copyPiece(Piece *piece)
 {
+	if (piece == NULL)
+		return NULL;
+
 	Piece *new = malloc(sizeof(Piece));
 	new->type = piece->type;
 	new->color = piece->color;

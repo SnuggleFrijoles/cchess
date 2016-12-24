@@ -69,7 +69,7 @@ LinkedList * listConcat(LinkedList *list1, LinkedList *list2)
 	}
 
 	// Add list2 to the end
-	result->next = list2;
+	result->next = list2->next;
 
-	return result;
+	return list1;
 }

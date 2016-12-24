@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 		else
 		{
 			// If it is the computers turn, find a move
-			findMove(game, move, game->turn^1);
+			findMove(game, move, game->turn);
 			printf("%s\n", move);
 
 			// Check for checkmate, otherwise make move.

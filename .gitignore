@@ -7,4 +7,6 @@ bin/*
 # Vim files
 *.swp
 
-
+# Dotfiles
+.*
+!/.gitignore

@@ -97,7 +97,7 @@ LinkedList * findPieces(GameState *game, int turn)
 {
 	// Create a list to store result
 	LinkedList *results = createList(NULL, NULL);
-	LinkedList *current = results;
+	/*LinkedList *current = results;*/
 	PiecePos *temp; 
 	
 	// Traverse board looking for players pieces
@@ -111,10 +111,10 @@ LinkedList * findPieces(GameState *game, int turn)
 				temp = createPiecePos(rank, file);
 				
 				// Add piece position to list
-				listAppend(current, temp);
+				listAppend(results, temp);
 
 				// Advance list
-				current = current->next;
+				//current = current->next;
 			}
 		}
 	}
@@ -127,7 +127,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 {
 	// Create a list to store result	
 	LinkedList *results = createList(NULL, NULL);
-	LinkedList *current = results;
+	//LinkedList *current = results;
 	Move *tempMove, *copyTempMove;
 	char charTempMove[4];
 
@@ -140,11 +140,11 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 			// Switch move direction based on turn
 			if (game->turn == WHITE) 
 			{
-				direction = 1;
+				direction = -1;
 			}
 			else
 			{
-				direction = -1;
+				direction = 1;
 			}
 
 			// Check three forward moves
@@ -160,13 +160,28 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(current, copyTempMove);
-					current = current->next;
+					listAppend(results, copyTempMove);
 				}
 
 				free(tempMove);
 			}
 			
+			// Check forward double move
+			tempMove = createMove(piecePos->rank,
+					piecePos->file,
+					piecePos->rank + 2*direction,
+					piecePos->file);
+
+			moveToChar(tempMove, charTempMove);
+
+			if (validMove(charTempMove, game->turn, game->board))
+			{
+				copyTempMove = copyMove(tempMove);
+				listAppend(results, copyTempMove);
+			}
+
+			free(tempMove);
+
 			break;
 		case KNIGHT:
 
@@ -218,22 +233,25 @@ void findMove(GameState *game, char move[4], int turn)
 
 	// Get all of current players pieces
 	LinkedList *pieces = findPieces(game, turn);
-	LinkedList *currentPiece = pieces->next;
+	LinkedList *currentPieceList = pieces->next;
 	Move *headMove = createMove(-1, -1, -1, -1);
 	LinkedList *allMoves = createList(headMove, NULL);
 	LinkedList *pieceMoves;
+	PiecePos *currentPiece;
 
 	// Loop through pieces
-	while (currentPiece != NULL)
+	while (currentPieceList != NULL)
 	{
-		// Get all moves for that piece
-		pieceMoves = findMoves(game, currentPiece->data);
+		currentPiece = currentPieceList->data;
 
+		// Get all moves for that piece
+		pieceMoves = findMoves(game, currentPiece);
+		
 		// Add moves to collection of all moves
 		allMoves = listConcat(allMoves, pieceMoves);
 
 		// Move to next piece
-		currentPiece = currentPiece->next;
+		currentPieceList = currentPieceList->next;
 	}
 
 	LinkedList *currentMove = allMoves->next;
@@ -242,7 +260,7 @@ void findMove(GameState *game, char move[4], int turn)
 	while (currentMove != NULL)
 	{
 		printMove(currentMove->data);
-		currentMove = allMoves->next;
+		currentMove = currentMove->next;
 	}
 #endif
 
@@ -263,24 +281,29 @@ void findMove(GameState *game, char move[4], int turn)
 		makeMove(tempMove, new->board);	
 
 		// Recursively evaluate that state
-		score = eval(new, 1);
+		score = eval(new, 0);
+		printf("Testing move %s, Score: %d\n", tempMove, score);
 
 		if (score > bestScore)
 		{
 			bestScore = score;
-			strncpy(tempMove, bestMove, 4);
+			strncpy(bestMove, tempMove, 4);
+			printf("New best move: %s\n", bestMove);
 		}
 
 		freeGameState(new);
+
+		currentMove = currentMove->next;
 	}
 
-	if (score == -1)
+	if (bestScore == -1)
 	{
 		printf("findMove: Error: no valid moves found\n");
 		exit(EXIT_FAILURE);
 	}
-
-	strncpy(bestMove, move, 4);
+	
+	printf("Best move: %s\n", bestMove);
+	strncpy(move, bestMove, 4);
 
 #endif
 }

@@ -430,8 +430,8 @@ void moveToChar(Move *move, char moveResult[4])
 //		exit(EXIT_FAILURE);
 	}
 
-	moveResult[0] = 'a' + move->startRank;
-	moveResult[1] = '0' + move->startFile;
-	moveResult[2] = 'a' + move->endRank;
-	moveResult[3] = '0' + move->endFile;
+	moveResult[0] = 'a' + move->startFile;
+	moveResult[1] = '8' - move->startRank;
+	moveResult[2] = 'a' + move->endFile;
+	moveResult[3] = '8' - move->endRank;
 }
