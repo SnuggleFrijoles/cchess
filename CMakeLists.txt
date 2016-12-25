@@ -1,8 +1,18 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.6)
 project(cchess)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
+set(CMAKE_CXX_STANDARD 11)
 
-add_custom_target(cchess COMMAND make -C ${cchess_SOURCE_DIR}
-        CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+set(SOURCE_FILES
+    src/ai.c
+    src/board.c
+    src/cchess.c
+    src/gameState.c
+    src/linkedList.c
+    src/piece.c
+    src/player.c
+    src/valid.c)
 
+include_directories(src/include)
+
+add_executable(cchess ${SOURCE_FILES})
