@@ -10,3 +10,6 @@ bin/*
 # Dotfiles
 .*
 !/.gitignore
+
+#cmake stuff
+cmake-build-debug/*
