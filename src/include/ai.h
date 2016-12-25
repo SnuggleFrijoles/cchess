@@ -4,7 +4,7 @@
 #include "gameState.h"
 #include "linkedList.h"
 
-int eval(GameState *game, int depth);
+double eval(GameState *game, int depth);
 
 void findMove(GameState *game, char move[4], int turn);
 

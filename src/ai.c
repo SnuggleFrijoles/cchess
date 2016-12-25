@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 #include "cchess.h"
 #include "ai.h"
@@ -13,12 +14,12 @@
 // Positive number = current turn winning
 // Negative number = current turn losing
 // The higher the better
-int eval(GameState *game, int depth)
+double eval(GameState *game, int depth)
 {
 	// At depth zero, evaluate and return score
 	if (depth == 0)
 	{
-		int score = 0;
+		double score = 0;
 
 		Piece *temp;
 
@@ -48,29 +49,32 @@ int eval(GameState *game, int depth)
 
 		// Get all of current players pieces
 		LinkedList *pieces = findPieces(game, game->turn);
-		
-		LinkedList *currentPiece = pieces->next;
-		LinkedList *allMoves;
+		LinkedList *currentPieceList = pieces->next;
+		Move *headMove = createMove(-1, -1, -1, -1);
+		LinkedList *allMoves = createList(headMove, NULL);
 		LinkedList *pieceMoves;
+		PiecePos *currentPiece;
 
 		// Loop through pieces
-		while (currentPiece != NULL)
+		while (currentPieceList != NULL)
 		{
+			currentPiece = currentPieceList->data;
+
 			// Get all moves for that piece
-			pieceMoves = findMoves(game, currentPiece->data);
+			pieceMoves = findMoves(game, currentPiece);
 
 			// Add moves to collection of all moves
 			allMoves = listConcat(allMoves, pieceMoves);
 
 			// Move to next piece
-			currentPiece = currentPiece->next;
+			currentPieceList = currentPieceList->next;
 		}
 
 		int moves = 0;
 		LinkedList *currentMove = allMoves->next;
 		GameState *new;
 		char move[4];
-		int score = 0;
+		double score = 0;
 
 		while (currentMove != NULL)
 		{
@@ -80,10 +84,17 @@ int eval(GameState *game, int depth)
 			// Play move
 			moveToChar(currentMove->data, move);
 			makeMove(move, new->board);	
+
+			// Simulate next player's turn
+			new->turn ^= 1;
 		
 			// Decrease depth and evaluate new state
 			score += eval(new, depth - 1);
 			moves++;
+
+			printf("Recursively testing move: %.4s Score: %f\n", move, score);
+
+			currentMove = currentMove->next;
 		}
 
 		// Return average score of moves
@@ -107,7 +118,7 @@ LinkedList * findPieces(GameState *game, int turn)
 		{
 			if (game->board->board[rank][file] && game->board->board[rank][file]->color == turn)
 			{
-				// Store piece position in stucture
+				// Store piece position in structure
 				temp = createPiecePos(rank, file);
 				
 				// Add piece position to list
@@ -130,9 +141,11 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 	//LinkedList *current = results;
 	Move *tempMove, *copyTempMove;
 	char charTempMove[4];
-
-			int direction;
+	int direction;
 	Piece *piece = game->board->board[piecePos->rank][piecePos->file];
+
+	int knightMoveRanks[8] = {-2, -1, 1, 2, 2, 1, -1, -2};
+	int knightMoveFiles[8] = {-1, -2, -2, -1, 1, 2, 2, 1};
 
 	switch (piece->type)
 	{
@@ -184,6 +197,27 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 
 			break;
 		case KNIGHT:
+
+			// Check all 8 possible moves for a knight
+
+
+			for (int i = 0; i < 8; i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank + knightMoveRanks[i],
+						piecePos->file + knightMoveFiles[i]);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
 
 			break;
 		case BISHOP: 
@@ -268,8 +302,8 @@ void findMove(GameState *game, char move[4], int turn)
 
 	GameState *new;
 	char tempMove[4], bestMove[4];
-	int bestScore = -1;
-	int score;
+	int bestScore = INT_MIN;
+	double score;
 
 	while (currentMove != NULL)
 	{
@@ -280,9 +314,12 @@ void findMove(GameState *game, char move[4], int turn)
 		moveToChar(currentMove->data, tempMove);
 		makeMove(tempMove, new->board);	
 
+		// Simulate next turn
+		new->turn ^= 1;
+
 		// Recursively evaluate that state
-		score = eval(new, 0);
-		printf("Testing move %s, Score: %d\n", tempMove, score);
+		score = eval(new, 3);
+		printf("Testing move %s, Score: %f\n", tempMove, score);
 
 		if (score > bestScore)
 		{

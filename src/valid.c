@@ -406,6 +406,7 @@ int validKing(char move[4], int turn, Board *board)
 
 void moveToChar(Move *move, char moveResult[4])
 {
+#if 0
 	if (move->startRank < 0 || move->startRank > 7)
 	{
 		printf("moveToChar: Error: startRank out of range %d\n", move->startRank);
@@ -429,7 +430,7 @@ void moveToChar(Move *move, char moveResult[4])
 		printf("moveToChar: Error: endFile out of range %d\n", move->endFile);
 //		exit(EXIT_FAILURE);
 	}
-
+#endif
 	moveResult[0] = 'a' + move->startFile;
 	moveResult[1] = '8' - move->startRank;
 	moveResult[2] = 'a' + move->endFile;
