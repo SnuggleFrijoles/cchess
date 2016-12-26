@@ -125,6 +125,11 @@ Move * createMove(
 	return new;
 }
 
+void freeMove(Move *move)
+{
+	free(move);
+}
+
 Move * copyMove(Move *orig)
 {
 	Move *copy = createMove(orig->startRank, orig->startFile, orig->endRank, orig->endFile);

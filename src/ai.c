@@ -72,6 +72,7 @@ double eval(GameState *game, int depth)
 
 		int moves = 0;
 		LinkedList *currentMove = allMoves->next;
+		Move *oldMove;
 		GameState *new;
 		char move[4];
 		double score = 0;
@@ -95,8 +96,16 @@ double eval(GameState *game, int depth)
 			printf("Recursively testing move: %.4s Score: %f\n", move, score);
 #endif
 
+			freeGameState(new);
+
+			oldMove = currentMove->data;
+
 			currentMove = currentMove->next;
+
+			freeMove(oldMove);
 		}
+
+		freeList(allMoves);
 
 		// Return average score of moves
 		return score / moves;
@@ -660,6 +669,8 @@ void findMove(GameState *game, char move[4], int turn)
 
 		currentMove = currentMove->next;
 	}
+
+	freeList(allMoves);
 
 	if (bestScore == INT_MIN)
 	{

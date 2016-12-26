@@ -35,6 +35,8 @@ Move * createMove(
 		unsigned char endFile
 	);
 
+void freeMove(Move *move);
+
 Move * copyMove(Move *orig);
 
 void printMove(Move *move);
