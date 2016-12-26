@@ -91,8 +91,9 @@ double eval(GameState *game, int depth)
 			// Decrease depth and evaluate new state
 			score += eval(new, depth - 1);
 			moves++;
-
+#ifdef DEBUG
 			printf("Recursively testing move: %.4s Score: %f\n", move, score);
+#endif
 
 			currentMove = currentMove->next;
 		}
@@ -144,8 +145,11 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 	int direction;
 	Piece *piece = game->board->board[piecePos->rank][piecePos->file];
 
-	int knightMoveRanks[8] = {-2, -1, 1, 2, 2, 1, -1, -2};
-	int knightMoveFiles[8] = {-1, -2, -2, -1, 1, 2, 2, 1};
+	// The relative locations of knight moves
+	static int knightMoves[8][2] = {{-2, -1}, {-1, -2}, {1, -2}, {2, -1}, {2, 1}, {1, 2}, {-1, 2}, {-2, 1}};
+
+	// The relative locations of king moves
+	static int kingMoves[8][2] = {{1, -1}, {1, 0}, {1, 1}, {0, -1}, {0, 1}, {-1, -1}, {-1, 0}, {-1, 1}};
 
 	switch (piece->type)
 	{
@@ -200,13 +204,12 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 
 			// Check all 8 possible moves for a knight
 
-
 			for (int i = 0; i < 8; i++)
 			{
 				tempMove = createMove(piecePos->rank,
 						piecePos->file,
-						piecePos->rank + knightMoveRanks[i],
-						piecePos->file + knightMoveFiles[i]);
+						piecePos->rank + knightMoves[i][0],
+						piecePos->file + knightMoves[i][1]);
 
 				moveToChar(tempMove, charTempMove);
 
@@ -222,14 +225,334 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 			break;
 		case BISHOP: 
 
+			// Check diagonal moves
+
+			for (int i = 0; (piecePos->rank + i < 8) && (piecePos->file + i < 8); i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank + i,
+						piecePos->file + i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			for (int i = 0; (piecePos->rank - i >= 0) && (piecePos->file - i >= 0); i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank - i,
+						piecePos->file - i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			for (int i = 0; (piecePos->rank - i >= 0) && (piecePos->file + i < 8); i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank - i,
+						piecePos->file + i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			for (int i = 0; (piecePos->rank + i < 8) && (piecePos->file - i >= 0); i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank + i,
+						piecePos->file - i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
 			break;
 		case ROOK: 
+
+			// Check vertical moves
+
+			for (int i = 0; piecePos->rank + i < 8; i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank + i,
+						piecePos->file);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			for (int i = 0; piecePos->rank - i >= 0; i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank - i,
+						piecePos->file);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			// Check horizontal moves
+
+			for (int i = 0; piecePos->file + i < 8; i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank,
+						piecePos->file + i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			for (int i = 0; piecePos->file - i >= 0; i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank,
+						piecePos->file - i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
 
 			break;
 		case QUEEN: 
 
+			// Check diagonal moves
+
+			for (int i = 0; (piecePos->rank + i < 8) && (piecePos->file + i < 8); i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank + i,
+						piecePos->file + i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			for (int i = 0; (piecePos->rank - i >= 0) && (piecePos->file - i >= 0); i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank - i,
+						piecePos->file - i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			for (int i = 0; (piecePos->rank - i >= 0) && (piecePos->file + i < 8); i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank - i,
+						piecePos->file + i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			for (int i = 0; (piecePos->rank + i < 8) && (piecePos->file - i >= 0); i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank + i,
+						piecePos->file - i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			// Check vertical moves
+
+			for (int i = 0; piecePos->rank + i < 8; i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank + i,
+						piecePos->file);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			for (int i = 0; piecePos->rank - i >= 0; i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank - i,
+						piecePos->file);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			// Check horizontal moves
+
+			for (int i = 0; piecePos->file + i < 8; i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank,
+						piecePos->file + i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
+			for (int i = 0; piecePos->file - i >= 0; i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank,
+						piecePos->file - i);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
+
 			break;
 		case KING: 
+
+			// Check all 8 possible moves for a king
+
+			for (int i = 0; i < 8; i++)
+			{
+				tempMove = createMove(piecePos->rank,
+						piecePos->file,
+						piecePos->rank + kingMoves[i][0],
+						piecePos->file + kingMoves[i][1]);
+
+				moveToChar(tempMove, charTempMove);
+
+				if (validMove(charTempMove, game->turn, game->board))
+				{
+					copyTempMove = copyMove(tempMove);
+					listAppend(results, copyTempMove);
+				}
+
+				free(tempMove);
+			}
 
 			break;
 		default: 
@@ -319,13 +642,18 @@ void findMove(GameState *game, char move[4], int turn)
 
 		// Recursively evaluate that state
 		score = eval(new, 3);
-		printf("Testing move %s, Score: %f\n", tempMove, score);
+
+#ifdef DEBUG
+		printf("Testing move %.4s, Score: %f\n", tempMove, score);
+#endif
 
 		if (score > bestScore)
 		{
 			bestScore = score;
 			strncpy(bestMove, tempMove, 4);
-			printf("New best move: %s\n", bestMove);
+#ifdef DEBUG
+			printf("New best move: %.4s\n", bestMove);
+#endif
 		}
 
 		freeGameState(new);
@@ -333,13 +661,13 @@ void findMove(GameState *game, char move[4], int turn)
 		currentMove = currentMove->next;
 	}
 
-	if (bestScore == -1)
+	if (bestScore == INT_MIN)
 	{
 		printf("findMove: Error: no valid moves found\n");
 		exit(EXIT_FAILURE);
 	}
 	
-	printf("Best move: %s\n", bestMove);
+	printf("Best move: %.4s\n", bestMove);
 	strncpy(move, bestMove, 4);
 
 #endif
