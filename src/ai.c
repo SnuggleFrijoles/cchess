@@ -49,14 +49,14 @@ double eval(GameState *game, int depth)
 
 		// Get all of current players pieces
 		LinkedList *pieces = findPieces(game, game->turn);
-		LinkedList *currentPieceList = pieces->next;
+		LinkedList *currentPieceList = pieces;
 		Move *headMove = createMove(-1, -1, -1, -1);
 		LinkedList *allMoves = createList(headMove, NULL);
 		LinkedList *pieceMoves;
 		PiecePos *currentPiece;
 
 		// Loop through pieces
-		while (currentPieceList != NULL)
+		while (currentPieceList != NULL && currentPieceList->data != NULL)
 		{
 			currentPiece = currentPieceList->data;
 
@@ -75,9 +75,9 @@ double eval(GameState *game, int depth)
 		Move *oldMove;
 		GameState *new;
 		char move[4];
-		double score = 0;
+		double score = 0, tempScore;
 
-		while (currentMove != NULL)
+		while (currentMove != NULL && currentMove->data != NULL)
 		{
 			// Create a copy of the current game state
 			new = createGameState(game);
@@ -90,10 +90,11 @@ double eval(GameState *game, int depth)
 			new->turn ^= 1;
 		
 			// Decrease depth and evaluate new state
-			score += eval(new, depth - 1);
+			tempScore = eval(new, depth - 1);
+			score += tempScore;
 			moves++;
 #ifdef DEBUG
-			printf("Recursively testing move: %.4s Score: %f\n", move, score);
+			printf("Player %d Testing move: %.4s Score: %f\n", new->turn, move, tempScore);
 #endif
 
 			freeGameState(new);
@@ -132,7 +133,7 @@ LinkedList * findPieces(GameState *game, int turn)
 				temp = createPiecePos(rank, file);
 				
 				// Add piece position to list
-				listAppend(results, temp);
+				results = listPush(results, temp);
 
 				// Advance list
 				//current = current->next;
@@ -147,7 +148,7 @@ LinkedList * findPieces(GameState *game, int turn)
 LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 {
 	// Create a list to store result	
-	LinkedList *results = createList(NULL, NULL);
+	LinkedList *results = NULL;
 	//LinkedList *current = results;
 	Move *tempMove, *copyTempMove;
 	char charTempMove[4];
@@ -186,7 +187,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -203,7 +204,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 			if (validMove(charTempMove, game->turn, game->board))
 			{
 				copyTempMove = copyMove(tempMove);
-				listAppend(results, copyTempMove);
+				results = listPush(results, copyTempMove);
 			}
 
 			free(tempMove);
@@ -225,7 +226,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -248,7 +249,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -266,7 +267,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -284,7 +285,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -302,7 +303,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -325,7 +326,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -343,7 +344,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -363,7 +364,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -381,7 +382,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -404,7 +405,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -422,7 +423,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -440,7 +441,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -458,7 +459,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -478,7 +479,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -496,7 +497,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -516,7 +517,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -534,7 +535,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -557,7 +558,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				if (validMove(charTempMove, game->turn, game->board))
 				{
 					copyTempMove = copyMove(tempMove);
-					listAppend(results, copyTempMove);
+					results = listPush(results, copyTempMove);
 				}
 
 				free(tempMove);
@@ -599,14 +600,14 @@ void findMove(GameState *game, char move[4], int turn)
 
 	// Get all of current players pieces
 	LinkedList *pieces = findPieces(game, turn);
-	LinkedList *currentPieceList = pieces->next;
-	Move *headMove = createMove(-1, -1, -1, -1);
-	LinkedList *allMoves = createList(headMove, NULL);
+	LinkedList *currentPieceList = pieces;
+	//Move *headMove = createMove(-1, -1, -1, -1);
+	LinkedList *allMoves = NULL;
 	LinkedList *pieceMoves;
 	PiecePos *currentPiece;
 
 	// Loop through pieces
-	while (currentPieceList != NULL)
+	while (currentPieceList != NULL && currentPieceList->data != NULL)
 	{
 		currentPiece = currentPieceList->data;
 
@@ -620,24 +621,24 @@ void findMove(GameState *game, char move[4], int turn)
 		currentPieceList = currentPieceList->next;
 	}
 
-	LinkedList *currentMove = allMoves->next;
+	LinkedList *currentMove = allMoves;
 
 #ifdef DEBUG
-	while (currentMove != NULL)
+	while (currentMove != NULL && currentMove->data != NULL)
 	{
 		printMove(currentMove->data);
 		currentMove = currentMove->next;
 	}
-#endif
 
-	currentMove = allMoves->next;
+	currentMove = allMoves;
+#endif
 
 	GameState *new;
 	char tempMove[4], bestMove[4];
 	int bestScore = INT_MIN;
 	double score;
 
-	while (currentMove != NULL)
+	while (currentMove != NULL && currentMove->data != NULL)
 	{
 		// Create a copy of the current game state
 		new = createGameState(game);
@@ -650,7 +651,7 @@ void findMove(GameState *game, char move[4], int turn)
 		new->turn ^= 1;
 
 		// Recursively evaluate that state
-		score = eval(new, 3);
+		score = eval(new, 4);
 
 #ifdef DEBUG
 		printf("Testing move %.4s, Score: %f\n", tempMove, score);
@@ -661,7 +662,7 @@ void findMove(GameState *game, char move[4], int turn)
 			bestScore = score;
 			strncpy(bestMove, tempMove, 4);
 #ifdef DEBUG
-			printf("New best move: %.4s\n", bestMove);
+			//printf("New best move: %.4s\n", bestMove);
 #endif
 		}
 

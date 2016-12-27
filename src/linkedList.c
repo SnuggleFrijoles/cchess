@@ -53,23 +53,23 @@ LinkedList * listPush(LinkedList *orig, void *item)
 // Concatinate two lists
 LinkedList * listConcat(LinkedList *list1, LinkedList *list2)
 {
+	// If there is no list1, just return the second list
 	if (list1 == NULL)
 	{
-		printf("listConcat: Error: cannot append to non-existant list\n");
-		exit(EXIT_FAILURE);
+		return list2;
 	}
 
 	// Start with list1
-	LinkedList *result = list1;	
+	LinkedList *temp = list1;
 
 	// Traverse list1
-	while (result->next != NULL)
+	while (temp->next != NULL)
 	{
-		result = result->next;
+		temp = temp->next;
 	}
 
-	// Add list2 to the end
-	result->next = list2->next;
+	// Add list2 to the end of list1 and return
+	temp->next = list2;
 
 	return list1;
 }
