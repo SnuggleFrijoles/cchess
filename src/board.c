@@ -108,35 +108,4 @@ void renderBoard(Board *board)
 	}
 }
 
-Move * createMove(
-		unsigned char startRank,
-		unsigned char startFile,
-		unsigned char endRank,
-		unsigned char endFile
-	)
-{
-	Move *new = malloc(sizeof(Move));
 
-	new->startRank = startRank;
-	new->startFile = startFile;
-	new->endRank = endRank;
-	new->endFile = endFile;
-	
-	return new;
-}
-
-void freeMove(Move *move)
-{
-	free(move);
-}
-
-Move * copyMove(Move *orig)
-{
-	Move *copy = createMove(orig->startRank, orig->startFile, orig->endRank, orig->endFile);
-	return copy;
-}
-
-void printMove(Move *move)
-{
-	printf("%d %d %d %d\n", move->startRank, move->startFile, move->endRank, move->endFile);
-}

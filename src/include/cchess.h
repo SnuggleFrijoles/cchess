@@ -8,6 +8,4 @@
 
 #define SMART_AI
 
-void makeMove(char *move, Board *board);
-
 #endif

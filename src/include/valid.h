@@ -10,6 +10,5 @@ int validBishop(char move[4], int turn, Board *board);
 int validQueen(char move[4], int turn, Board *board);
 int validKing(char move[4], int turn, Board *board);
 
-void moveToChar(Move *move, char *moveResult);
 
 #endif

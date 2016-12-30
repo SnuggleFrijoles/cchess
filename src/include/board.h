@@ -20,25 +20,4 @@ Board * copyBoard(Board *board);
 // Draw the board
 void renderBoard(Board *board);
 
-// Information about a move
-typedef struct move {
-	unsigned char startRank;
-	unsigned char startFile;
-	unsigned char endRank;
-	unsigned char endFile;
-} Move;
-
-Move * createMove(
-		unsigned char startRank,
-		unsigned char startFile,
-		unsigned char endRank,
-		unsigned char endFile
-	);
-
-void freeMove(Move *move);
-
-Move * copyMove(Move *orig);
-
-void printMove(Move *move);
-
 #endif

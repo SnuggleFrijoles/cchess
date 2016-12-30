@@ -9,6 +9,7 @@
 #include "gameState.h"
 #include "ai.h"
 #include "valid.h"
+#include "move.h"
 
 
 /*
@@ -51,26 +52,6 @@ int isCheckmate(char move[4], int turn, Board *board)
 		return (board->board[endRank][endFile]->type == KING);
 	else
 		return 0;
-}
-
-/*
-Function: makeMove
-Conducts a valid move.
-Takes parameters string of move and a pointer to the board.
-Returns nothing.
-*/
-
-void makeMove(char *move, Board *board)
-{
-	// Get the integer values for the move.
-	int startFile = move[0] - 97;
-	int startRank = 8 - (move[1] - 48);
-	int endFile = move[2] - 97;
-	int endRank = 8 - (move[3] - 48);
-
-	// Conduct the move.
-	board->board[endRank][endFile] = board->board[startRank][startFile];
-	board->board[startRank][startFile] = NULL;
 }
 
 /*
