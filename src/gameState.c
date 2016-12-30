@@ -55,3 +55,22 @@ void freeGameState(GameState *game)
 	// Free game state
 	free(game);
 }
+
+void freeGameStateList(LinkedList *gameStates)
+{
+	LinkedList *prev = gameStates;
+	LinkedList *next;
+
+	while (prev != NULL)
+	{
+		next = prev->next;
+
+		// Free the move data
+		freeGameState(prev->data);
+
+		// Free the linked list node
+		free(prev);
+
+		prev = next;
+	}
+}

@@ -9,6 +9,7 @@
 #include "valid.h"
 #include "piece.h"
 #include "linkedList.h"
+#include "move.h"
 
 // Function for evaluating a game to determine who is winning
 // Positive number = current turn winning
@@ -70,9 +71,10 @@ double eval(GameState *game, int depth)
 			currentPieceList = currentPieceList->next;
 		}
 
+		freePiecePosList(pieces);
+
 		int moves = 0;
 		LinkedList *currentMove = allMoves->next;
-		Move *oldMove;
 		GameState *new;
 		char move[4];
 		double score = 0, tempScore;
@@ -99,14 +101,10 @@ double eval(GameState *game, int depth)
 
 			freeGameState(new);
 
-			oldMove = currentMove->data;
-
 			currentMove = currentMove->next;
-
-			freeMove(oldMove);
 		}
 
-		freeList(allMoves);
+		freeMoveList(allMoves);
 
 		// Return average score of moves
 		return score / moves;
@@ -621,6 +619,8 @@ void findMove(GameState *game, char move[4], int turn)
 		currentPieceList = currentPieceList->next;
 	}
 
+	freePiecePosList(pieces);
+
 	LinkedList *currentMove = allMoves;
 
 #ifdef DEBUG
@@ -671,7 +671,7 @@ void findMove(GameState *game, char move[4], int turn)
 		currentMove = currentMove->next;
 	}
 
-	freeList(allMoves);
+	freeMoveList(allMoves);
 
 	if (bestScore == INT_MIN)
 	{

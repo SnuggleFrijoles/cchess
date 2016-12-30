@@ -1,6 +1,8 @@
 #ifndef PIECES_H
 #define PIECES_H
 
+#include "linkedList.h"
+
 // Give each piece a value
 #define PAWN 0
 #define ROOK 1
@@ -40,5 +42,9 @@ typedef struct piecePos {
 } PiecePos;
 
 PiecePos * createPiecePos(unsigned char rank, unsigned char file);
+
+void freePiecePos(PiecePos *p);
+
+void freePiecePosList(LinkedList *piecePos);
 
 #endif

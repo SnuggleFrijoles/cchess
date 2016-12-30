@@ -4,6 +4,7 @@
 #include "board.h"
 #include "piece.h"
 #include "player.h"
+#include "linkedList.h"
 
 // Game state
 typedef struct GameState {
@@ -16,6 +17,9 @@ typedef struct GameState {
 } GameState;
 
 GameState * createGameState();
+
 void freeGameState(GameState *game);
+
+void freeGameStateList(LinkedList *gameStates);
 
 #endif

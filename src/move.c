@@ -67,7 +67,33 @@ void makeMove(char *move, Board *board)
 	int endFile = move[2] - 97;
 	int endRank = 8 - (move[3] - 48);
 
+	// Check if there exists a piece at the end position
+	if (board->board[endRank][endFile] != NULL)
+	{
+		// Free associated memory
+		freePiece(board->board[endRank][endFile]);
+	}
+
 	// Conduct the move.
 	board->board[endRank][endFile] = board->board[startRank][startFile];
 	board->board[startRank][startFile] = NULL;
+}
+
+void freeMoveList(LinkedList *moves)
+{
+	LinkedList *prev = moves;
+	LinkedList *next;
+
+	while (prev != NULL)
+	{
+		next = prev->next;
+
+		// Free the move data
+		freeMove(prev->data);
+
+		// Free the linked list node
+		free(prev);
+
+		prev = next;
+	}
 }

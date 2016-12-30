@@ -9,6 +9,7 @@
 #define SRC_INCLUDE_MOVE_H_
 
 #include "board.h"
+#include "linkedList.h"
 
 // Information about a move
 typedef struct move {
@@ -34,5 +35,7 @@ void printMove(Move *move);
 void moveToChar(Move *move, char *moveResult);
 
 void makeMove(char *move, Board *board);
+
+void freeMoveList(LinkedList *moves);
 
 #endif /* SRC_INCLUDE_MOVE_H_ */

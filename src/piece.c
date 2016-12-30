@@ -76,3 +76,27 @@ PiecePos * createPiecePos(unsigned char rank, unsigned char file)
 	new->file = file;
 	return new;
 }
+
+void freePiecePos(PiecePos *p)
+{
+	free(p);
+}
+
+void freePiecePosList(LinkedList *piecePos)
+{
+	LinkedList *prev = piecePos;
+	LinkedList *next;
+
+	while (prev != NULL)
+	{
+		next = prev->next;
+
+		// Free the move data
+		freePiecePos(prev->data);
+
+		// Free the linked list node
+		free(prev);
+
+		prev = next;
+	}
+}
