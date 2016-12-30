@@ -94,7 +94,7 @@ double eval(GameState *game, int depth)
 			score += tempScore;
 			moves++;
 #ifdef DEBUG
-			printf("Player %d Testing move: %.4s Score: %f\n", new->turn, move, tempScore);
+			//printf("Player %d Testing move: %.4s Score: %f\n", new->turn, move, tempScore);
 #endif
 
 			freeGameState(new);
@@ -651,10 +651,10 @@ void findMove(GameState *game, char move[4], int turn)
 		new->turn ^= 1;
 
 		// Recursively evaluate that state
-		score = eval(new, 4);
+		score = eval(new, 3);
 
 #ifdef DEBUG
-		printf("Testing move %.4s, Score: %f\n", tempMove, score);
+		//printf("Testing move %.4s, Score: %f\n", tempMove, score);
 #endif
 
 		if (score > bestScore)

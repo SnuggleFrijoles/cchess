@@ -51,4 +51,7 @@ void freeGameState(GameState *game)
 	// Free players
 	freePlayer(game->white);
 	freePlayer(game->black);
+
+	// Free game state
+	free(game);
 }

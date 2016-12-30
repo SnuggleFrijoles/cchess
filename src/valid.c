@@ -21,14 +21,6 @@ int validMove(char move[4], int turn, Board *board)
 	int endFile = move[2] - 97;
 	int endRank = 8 - (move[3] - 48);
 
-	// Get the piece being moved.
-	Piece *piece = board->board[startRank][startFile];
-	Piece *destination = board->board[endRank][endFile];
-
-	// Check if piece real
-	if (piece == NULL)
-		return 0;
-
 	// Check to see if the start and end positions are valid.
 	if (startFile < 0 | startFile > 7)
 	{
@@ -50,6 +42,14 @@ int validMove(char move[4], int turn, Board *board)
 		/*printf("End rank must be between 1 and 8: %d\n", endRank + 1);*/
 		return 0;
 	}
+
+	// Get the piece being moved.
+	Piece *piece = board->board[startRank][startFile];
+	Piece *destination = board->board[endRank][endFile];
+
+	// Check if piece real
+	if (piece == NULL)
+		return 0;
 
 	// Check to see if the wrongly owned piece is being moved.
 	if (piece->color != turn)
