@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
+#include <float.h>
+
 
 #include "cchess.h"
 #include "ai.h"
@@ -621,9 +622,14 @@ void findMove(GameState *game, char move[4], int turn, int depth)
 #endif
 
 	GameState *new;
-	char tempMove[4], bestMove[4];
-	int bestScore = INT_MIN;
+	char tempMove[4];
+	char *copyTempMove;
+	double bestScore = -DBL_MAX;
 	double score;
+
+	// List of string moves that all have same score
+	LinkedList *bestMoves = NULL;
+	int numBestMoves = 0;
 
 	while (currentMove != NULL && currentMove->data != NULL)
 	{
@@ -647,10 +653,31 @@ void findMove(GameState *game, char move[4], int turn, int depth)
 		if (score > bestScore)
 		{
 			bestScore = score;
-			strncpy(bestMove, tempMove, 4);
+
+			// Free old best moves
+			freeList(bestMoves);
+			bestMoves = NULL;
+
+			// Copy the move string
+			copyTempMove = malloc(sizeof(char) * 4);
+			strncpy(copyTempMove, tempMove, 4);
+
+			// Add move to list of best moves
+			bestMoves = listPush(bestMoves, copyTempMove);
+			numBestMoves = 1;
 #ifdef DEBUG
 			//printf("New best move: %.4s\n", bestMove);
 #endif
+		}
+		else if (score == bestScore)
+		{
+			// Copy the move string
+			copyTempMove = malloc(sizeof(char) * 4);
+			strncpy(copyTempMove, tempMove, 4);
+
+			// Add move to list of best moves
+			bestMoves = listPush(bestMoves, copyTempMove);
+			numBestMoves++;
 		}
 
 		freeGameState(new);
@@ -660,14 +687,25 @@ void findMove(GameState *game, char move[4], int turn, int depth)
 
 	freeMoveList(allMoves);
 
-	if (bestScore == INT_MIN)
+	if (bestScore == -DBL_MAX)
 	{
 		printf("findMove: Error: no valid moves found\n");
 		exit(EXIT_FAILURE);
 	}
 	
-	//printf("Best move: %.4s\n", bestMove);
-	strncpy(move, bestMove, 4);
+	// Choose a bestMove
+	int randMoveIndex = rand() % numBestMoves;
+	LinkedList *currentBestMove = bestMoves;
+
+	for (int i = 0; i < randMoveIndex; i++)
+	{
+		currentBestMove = currentBestMove->next;
+	}
+
+	strncpy(move, currentBestMove->data, 4);
+
+	// Free best moves
+	freeList(bestMoves);
 
 #endif
 }

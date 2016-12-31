@@ -19,6 +19,7 @@ void freeList(LinkedList *list)
 	while (prev != NULL)
 	{
 		next = prev->next;
+		//free(prev->data);
 		free(prev);
 		prev = next;
 	}
