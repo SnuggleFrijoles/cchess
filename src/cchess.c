@@ -67,81 +67,176 @@ char move[4];
 
 int main(int argc, char *argv[])
 {
+	// Flags
+	int simulation = 0;
+	int quiet = 0;
+
+	int evalDepth = 3;
+	int games = 1;
+
 	// Get a random seed.
 	srand(time(NULL));
 
-	// Create a game
-	GameState *game = createGameState(NULL);
+	// Check for command line flags
+	int args = argc - 1;
 
-	// Run player vs computer game until done.
-	while (done == 0)
+	while (args > 0)
 	{
-		renderBoard(game->board);
-		/*printf("%d\n", eval(game ));*/
-
-		// Determine whos turn it is.
-		if (game->turn == PLAYER)
+		if (strncmp(argv[args], "-sim", 4) == 0)
 		{
-			// If it is the players turn, get the desired move.
-			printf("%s", "Your move: ");
-
-			// Get the move.
-			scanf("%s", move);
-
-			// Check for quit
-			if (strncmp(move, "exit", 4) == 0 || strncmp(move, "quit", 4) == 0)
-				done = 1;
-			else
+			simulation = 1;
+		}
+		else if (strncmp(argv[args], "-depth=", 7) == 0)
+		{
+			if (strlen(argv[args]) >= 8)
 			{
-				if (validMove(move, game->turn, game->board) == 1)
+				char depthString[2];
+				strncpy(depthString, &argv[args][7], 2);
+				evalDepth = strtol(depthString, (char **)NULL, 10);
+				printf("Setting evaluation depth to %d\n", evalDepth);
+			}
+		}
+		else if (strncmp(argv[args], "-quiet", 6) == 0)
+		{
+			quiet = 1;
+		}
+		else if (strncmp(argv[args], "-games=", 7) == 0)
+		{
+			if (strlen(argv[args]) >= 8)
+			{
+				char gamesString[3];
+				strncpy(gamesString, &argv[args][7], 3);
+				games = strtol(gamesString, (char **)NULL, 10);
+				printf("Setting number of games to %d\n", games);
+			}
+		}
+
+		args--;
+	}
+
+
+	// Determine play mode
+	if (simulation)
+	{
+		for (int i = 0; i < games; i++)
+		{
+			// Create a game
+			GameState *game = createGameState(NULL);
+			done = 0;
+
+			// Run computer vs computer game until done.
+			while (done == 0)
+			{
+				if (!quiet)
 				{
-					if (isCheckmate(move, game->turn, game->board) == 1)
+					renderBoard(game->board);
+				}
+
+				findMove(game, move, game->turn, evalDepth);
+
+				// Check for checkmate, otherwise make move.
+				if (isCheckmate(move, game->turn, game->board) == 1)
+				{
+					makeMove(move, game->board);
+
+					if (!quiet)
 					{
 						renderBoard(game->board);
-
-						if (game->turn % 2 == 0)
-							printf("%s\n", "Player wins.");
-						else
-							printf("%s\n", "Computer wins.");
-
-						done = 1;
 					}
+
+					if (game->turn % 2 == 0)
+						printf("%s\n", "Computer 1 wins.");
 					else
+						printf("%s\n", "Computer 2 wins.");
+
+					done = 1;
+				}
+				else
+				{
+					makeMove(move, game->board);
+					game->turn ^= 1;
+				}
+			}
+
+			freeGameState(game);
+		}
+	}
+	else
+	{
+		// Create a game
+		GameState *game = createGameState(NULL);
+
+		// Run player vs computer game until done.
+		while (done == 0)
+		{
+			renderBoard(game->board);
+			/*printf("%d\n", eval(game ));*/
+
+			// Determine whos turn it is.
+			if (game->turn == PLAYER)
+			{
+				// If it is the players turn, get the desired move.
+				printf("%s", "Your move: ");
+
+				// Get the move.
+				scanf("%s", move);
+
+				// Check for quit
+				if (strncmp(move, "exit", 4) == 0 || strncmp(move, "quit", 4) == 0)
+					done = 1;
+				else
+				{
+					if (validMove(move, game->turn, game->board) == 1)
 					{
-						makeMove(move, game->board);
-						game->turn ^= 1;
+						if (isCheckmate(move, game->turn, game->board) == 1)
+						{
+							renderBoard(game->board);
+
+							if (game->turn % 2 == 0)
+								printf("%s\n", "Player wins.");
+							else
+								printf("%s\n", "Computer wins.");
+
+							done = 1;
+						}
+						else
+						{
+							makeMove(move, game->board);
+							game->turn ^= 1;
+						}
 					}
 				}
 			}
-		}
-		else
-		{
-			// If it is the computers turn, find a move
-			findMove(game, move, game->turn);
-			printf("%s\n", move);
-
-			// Check for checkmate, otherwise make move.
-			if (isCheckmate(move, game->turn, game->board) == 1)
-			{
-				renderBoard(game->board);
-
-				if (game->turn % 2 == 0)
-					printf("%s\n", "Player wins.");
-				else
-					printf("%s\n", "Computer wins.");
-
-				done = 1;
-			}
 			else
 			{
-				makeMove(move, game->board);
-				game->turn ^= 1;
+				// If it is the computers turn, find a move
+				findMove(game, move, game->turn, evalDepth);
+				printf("%s\n", move);
+
+				// Check for checkmate, otherwise make move.
+				if (isCheckmate(move, game->turn, game->board) == 1)
+				{
+					makeMove(move, game->board);
+					renderBoard(game->board);
+
+					if (game->turn % 2 == 0)
+						printf("%s\n", "Player wins.");
+					else
+						printf("%s\n", "Computer wins.");
+
+					done = 1;
+				}
+				else
+				{
+					makeMove(move, game->board);
+					game->turn ^= 1;
+				}
 			}
+
 		}
 
+		freeGameState(game);
 	}
-
-	freeGameState(game);
 
 	return 0;
 }

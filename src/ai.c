@@ -153,10 +153,13 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 	int direction;
 	Piece *piece = game->board->board[piecePos->rank][piecePos->file];
 
-	// The relative locations of knight moves
+	// Possible moves for a pawn
+	static int pawnMoves[4][2] = {{1, -1}, {1, 0}, {1, 1}, {2, 0}};
+
+	// Possible moves for a knight
 	static int knightMoves[8][2] = {{-2, -1}, {-1, -2}, {1, -2}, {2, -1}, {2, 1}, {1, 2}, {-1, 2}, {-2, 1}};
 
-	// The relative locations of king moves
+	// Possible moves for a king
 	static int kingMoves[8][2] = {{1, -1}, {1, 0}, {1, 1}, {0, -1}, {0, 1}, {-1, -1}, {-1, 0}, {-1, 1}};
 
 	switch (piece->type)
@@ -172,13 +175,13 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 				direction = 1;
 			}
 
-			// Check three forward moves
-			for (int i = -1; i <= 1; i++)
+			// Check four possible moves
+			for (int i = 0; i < 4; i++)
 			{
 				tempMove = createMove(piecePos->rank,
 						piecePos->file,
-						piecePos->rank + direction,
-						piecePos->file + i);
+						piecePos->rank + (direction * pawnMoves[i][0]),
+						piecePos->file + pawnMoves[i][1]);
 
 				moveToChar(tempMove, charTempMove);
 
@@ -190,22 +193,6 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 
 				free(tempMove);
 			}
-			
-			// Check forward double move
-			tempMove = createMove(piecePos->rank,
-					piecePos->file,
-					piecePos->rank + 2*direction,
-					piecePos->file);
-
-			moveToChar(tempMove, charTempMove);
-
-			if (validMove(charTempMove, game->turn, game->board))
-			{
-				copyTempMove = copyMove(tempMove);
-				results = listPush(results, copyTempMove);
-			}
-
-			free(tempMove);
 
 			break;
 		case KNIGHT:
@@ -571,7 +558,7 @@ LinkedList * findMoves(GameState *game, PiecePos *piecePos)
 	return results;
 }
 
-void findMove(GameState *game, char move[4], int turn)
+void findMove(GameState *game, char move[4], int turn, int depth)
 {
 #ifdef DUMB_AI
 	// Setup some variables.
@@ -623,7 +610,7 @@ void findMove(GameState *game, char move[4], int turn)
 
 	LinkedList *currentMove = allMoves;
 
-#ifdef DEBUG
+#ifdef DEBUGZ
 	while (currentMove != NULL && currentMove->data != NULL)
 	{
 		printMove(currentMove->data);
@@ -651,7 +638,7 @@ void findMove(GameState *game, char move[4], int turn)
 		new->turn ^= 1;
 
 		// Recursively evaluate that state
-		score = eval(new, 3);
+		score = eval(new, depth);
 
 #ifdef DEBUG
 		//printf("Testing move %.4s, Score: %f\n", tempMove, score);
@@ -679,7 +666,7 @@ void findMove(GameState *game, char move[4], int turn)
 		exit(EXIT_FAILURE);
 	}
 	
-	printf("Best move: %.4s\n", bestMove);
+	//printf("Best move: %.4s\n", bestMove);
 	strncpy(move, bestMove, 4);
 
 #endif

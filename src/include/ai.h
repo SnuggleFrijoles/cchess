@@ -6,7 +6,7 @@
 
 double eval(GameState *game, int depth);
 
-void findMove(GameState *game, char move[4], int turn);
+void findMove(GameState *game, char move[4], int turn, int depth);
 
 LinkedList * findPieces(GameState *game, int turn);
 
